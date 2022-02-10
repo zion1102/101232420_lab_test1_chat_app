@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <title>Socket Example</title>
+   </head>
+   
+   <body>
+      <h1>Sample Chat App</h1>
+      <div id = "error-container"></div>
+      <input id = "name" type = "text" name = "name" value = "" 
+         placeholder = "Enter your name!">
+      <button type = "button" name = "button" onclick = "setUsername()">
+         Send!
+      </button>
+      <br/>
+      <input id = "room" type = "text" name = "room" value = "" 
+         placeholder = "Enter room name!">
+      <button type = "button" name = "button" onclick = "joinRoom()">
+         Join Room!
+      </button>
+
+      <br/>
+      <input id = "message" type = "text" name = "message" value = "" 
+         placeholder = "Enter message to send!">
+      <button type = "button" name = "button" onclick = "sendMessage()">
+         Send Message!
+      </button>
+      <li><a href="/logout">Logout</a></li>
+      <h3>Chat History </h3>
+      <div id = "message-container"></div>
+      
+   </body>
+
+   <script src = "/socket.io/socket.io.js"></script>
+   <script>
+      
+       const client = io()
+       //client.emit('message', {name : 'Pritesh'})
+
+       client.on('welcome', (data) => {
+           console.log(data)
+           document.getElementById('message-container').innerHTML += '<div>' +  data + '</div>'
+       })
+
+       client.on('newMessage', (msg) => {
+           //console.log(data)
+           const send = `<b>${msg.sender} :<b> ${msg.message}`
+           document.getElementById('message-container').innerHTML += '<div>' +  send + '</div>'
+       })
+
+       function setUsername(){
+           client.emit('newUser', document.getElementById('name').value)
+       }
+
+       function joinRoom(){
+           client.emit('joinroom', document.getElementById('room').value)
+       }
+
+       function sendMessage(){
+           client.emit('message',
+            { room: document.getElementById('room').value,
+             message: document.getElementById('message').value})
+       }
+   </script>
+</html

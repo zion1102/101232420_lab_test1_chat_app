@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <title>Socket Example</title>
+   </head>
+   
+   <body>
+      <h1>Sample Chat App</h1>
+      <div id = "error-container"></div>
+      <br/>
+      <input id = "room" type = "text" name = "room" value = "" 
+         placeholder = "Enter room name!">
+      <button type = "button" name = "button" onclick = "joinRoom()">
+         Join Room!
+      </button>
+
+      <br/>
+      <input id = "message" type = "text" name = "message" value = "" 
+         placeholder = "Enter message to send!">
+      <button type = "button" name = "button" onclick = "sendMessage()">
+         Send Message!
+      </button>
+      <li><a href="/logout">Logout</a></li>
+      <h3>Chat History</h3>
+      <div id = "message-container"></div>
+
+      <script src="/socket.io/socket.io.js"></script>
+      <script>
+         const client = io()
+
+         client.on('welcome', (message) => {
+               addMessage(message)
+         })
+
+         //Button click to join the room
+         function joinRoom(){
+            var roomName = document.getElementById('room').value
+            client.emit('join', roomName)
+         }
+
+         //Message from all other clients
+         client.on('newMessage', (msg) => {
+            const data = `<b>${msg.sender}:</b> ${msg.message}`
+            addMessage(data)
+         })
+
+         //Button click to send message
+         function sendMessage(){
+            
+            var msg = document.getElementById('message').value
+
+            var roomName = document.getElementById('room').value
+            if(roomName.length == 0){//Send to all user
+               client.emit('message', msg)
+               addMessage('Me: ' + msg)
+            }else{//Send to room user
+                msg = {
+                  
+                   room: roomName,
+                   message: document.getElementById('message').value
+                }
+                client.emit('room_message', msg)
+                addMessage(document.getElementById('message').value)
+            }
+           
+         }
+
+         //Custom message display
+         function addMessage(message){
+            document.getElementById('message-container').innerHTML += '<div>' +  message + '</div>'
+         }
+      </script>
+   </body>
+</html>
